@@ -9,6 +9,7 @@ project(jetbot_qr_codes)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   rospy
+  jetbot_ros
 )
 
 ## System dependencies are found with CMake's conventions
@@ -103,7 +104,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES jetbot_qr_codes
-#  CATKIN_DEPENDS rospy
+   CATKIN_DEPENDS rospy jetbot_ros
 #  DEPENDS system_lib
 )
 
