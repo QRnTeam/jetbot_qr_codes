@@ -1,0 +1,3 @@
+<launch>
+	<node pkg="jetbot_qr_codes" type="cmd_raw.py" name="jetbot_cmd_raw" />
+</launch>
