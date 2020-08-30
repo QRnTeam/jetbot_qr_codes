@@ -12,9 +12,15 @@ while True:
     ret, frame = cam.read()
     markers, ids, rejected = cv2.aruco.detectMarkers(image=frame,dictionary=arucoDict,cameraMatrix=mtx,distCoeff=dist)
 
-    print(ids)
-
+    rvecs, tvecs, objPoints = cv2.aruco.estimatePoseSingleMarkers(markers, 0.0935, mtx, dist)
     cv2.aruco.drawDetectedMarkers(frame,markers)
+
+    if np.any(rvecs):
+        for i in range(len(rvecs)):
+
+            print(tvecs[i][0][2],ids[i])
+            cv2.aruco.drawAxis(frame, mtx, dist, rvecs[i], tvecs[i], 0.05)
+
 
     cv2.imshow("Live", frame)
 
