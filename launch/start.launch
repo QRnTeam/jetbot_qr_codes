@@ -4,5 +4,6 @@
 
 		<node pkg="jetbot_qr_codes" type="cmd_raw.py" name="jetbot_cmd_raw" />
 		<node pkg="jetbot_qr_codes" type="cmd_str.py" name="jetbot_cmd_str" />
+		<node pkg="jetbot_qr_codes" type="cmd_vel.py" name="jetbot_cmd_vel" />
 	</group>
 </launch>
