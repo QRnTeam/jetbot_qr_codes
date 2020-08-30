@@ -1,3 +1,6 @@
 cmd_raw_topic: cmd_raw
 cmd_str_topic: cmd_str
 cmd_vel_topic: cmd_vel
+
+wheelbase_meters: 0.10
+wheel_radius_meters: 0.03

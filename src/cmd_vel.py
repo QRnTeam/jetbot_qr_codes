@@ -7,11 +7,11 @@ cmd_raw_topic = rospy.get_param('cmd_raw_topic')
 cmd_vel_topic = rospy.get_param('cmd_vel_topic')
 
 class CmdVel:
-    def __init__(self):
+    def __init__(self, wheelbase_meters, wheel_radius_meters):
         self._raw = rospy.Publisher(cmd_raw_topic, String, queue_size=10)
         self._vel = rospy.Subscriber(cmd_vel_topic, Twist, self.callback)
-        self._wheelbase_meters = 0.10
-        self._wheel_radius_meters = 0.03
+        self._wheelbase_meters = wheelbase_meters
+        self._wheel_radius_meters = wheel_radius_meters
 
     def callback(self, twist):
         # Apply twist to two-wheeled differential drive robot.
@@ -65,5 +65,7 @@ class CmdVel:
 
 if __name__ == '__main__':
     rospy.init_node('jetbot_cmd_vel')
-    CmdVel()
+    wheelbase_meters = rospy.get_param('wheelbase_meters')
+    wheel_radius_meters = rospy.get_param('wheel_radius_meters')
+    CmdVel(wheelbase_meters, wheel_radius_meters)
     rospy.spin()
