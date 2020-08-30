@@ -1,0 +1,8 @@
+<launch>
+	<group ns="jetbot_qr_codes">
+		<rosparam command="load" file="$(find jetbot_qr_codes)/config/default.yaml" /> 
+
+		<node pkg="jetbot_qr_codes" type="cmd_raw.py" name="jetbot_cmd_raw" />
+		<node pkg="jetbot_qr_codes" type="cmd_str.py" name="jetbot_cmd_str" />
+	</group>
+</launch>

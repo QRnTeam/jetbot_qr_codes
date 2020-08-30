@@ -3,16 +3,18 @@ import rospy
 from std_msgs.msg import String
 from geometry_msgs.msg import Twist
 
+cmd_raw_topic = rospy.get_param('cmd_raw_topic')
+cmd_vel_topic = rospy.get_param('cmd_vel_topic')
 
 class CmdVel:
     def __init__(self):
-        self._raw = rospy.Publisher('/jetbot_motors/cmd_raw', String, queue_size=10)
-        self._vel = rospy.Subscriber('/cmd_vel', Twist, self.callback)
+        self._raw = rospy.Publisher(cmd_raw_topic, String, queue_size=10)
+        self._vel = rospy.Subscriber(cmd_vel_topic, Twist, self.callback)
         self._wheelbase = 1.0
         self._wheel_radius = 1.0
 
     def callback(self, msg):
-        rospy.loginfo("Received /cmd_vel message: {}".format(msg))
+        rospy.loginfo("Received cmd_vel message: {}".format(msg))
 
         # TODO: Apply kinematics of two-wheeled differential drive robot.
         #
@@ -38,6 +40,6 @@ class CmdVel:
 
 
 if __name__ == '__main__':
-    rospy.init_node('~')
+    rospy.init_node('jetbot_cmd_vel')
     CmdVel()
     rospy.spin()

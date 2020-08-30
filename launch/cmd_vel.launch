@@ -1,4 +1,0 @@
-<launch>
-	<include file="$(find jetbot_ros)/launch/start.launch" />
-	<node pkg="jetbot_qr_codes" type="cmd_vel.py" name="cmd_vel" />
-</launch>
