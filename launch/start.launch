@@ -6,4 +6,8 @@
 		<node pkg="jetbot_qr_codes" type="cmd_str.py" name="jetbot_cmd_str" />
 		<node pkg="jetbot_qr_codes" type="cmd_vel.py" name="jetbot_cmd_vel" />
 	</group>
+
+	<group ns="jetbot_ros">
+		<node pkg="jetbot_ros" type="jetbot_camera" name="jetbot_camera" />
+	</group>
 </launch>
