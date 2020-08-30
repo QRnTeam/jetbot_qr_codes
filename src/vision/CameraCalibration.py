@@ -27,9 +27,10 @@ for fname in images:
 cv.destroyAllWindows()
 
 ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
-print(mtx)
+
 print(dist)
-img = cv.imread('resource/calibrate/WIN_20200828_17_50_45_Pro.jpg')
+
+img = cv.imread('resource/2arucos.jpg')
 h,  w = img.shape[:2]
 newcameramtx, roi = cv.getOptimalNewCameraMatrix(mtx, dist, (w,h), 1, (w,h))
 
