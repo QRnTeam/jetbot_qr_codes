@@ -3,6 +3,8 @@ import rospy
 from Adafruit_MotorHAT import Adafruit_MotorHAT 
 from std_msgs.msg import String
 
+cmd_raw_topic = rospy.get_param('cmd_raw_topic')
+
 class CmdRaw(object):
     def __init__(self):
         self._driver = Adafruit_MotorHAT(i2c_bus=1)
@@ -19,7 +21,7 @@ class CmdRaw(object):
                 "inb": 3,
             },
         }
-        self._sub = rospy.Subscriber("/cmd_raw", String, self.callback)
+        self._sub = rospy.Subscriber(cmd_raw_topic, String, self.callback)
 
 
     def set_speed(self, name, value):
@@ -58,12 +60,12 @@ class CmdRaw(object):
             rospy.logerr(rospy.get_caller_id() + ' invalid cmd_raw="%s", values must be between -1.0 and 1.0', msg.data)
             return
 
-        rospy.loginfo(rospy.get_caller_id() + ' cmd_dir speeds left=%f, right=%f', left, right)
+        rospy.loginfo(rospy.get_caller_id() + ' cmd_raw speeds left=%f, right=%f', left, right)
         self.set_speed("left", left)
         self.set_speed("right", right)
 
         
 if __name__ == '__main__':
-    rospy.init_node("~", log_level=rospy.INFO)
+    rospy.init_node("jetbot_cmd_raw")
     CmdRaw()
     rospy.spin()
