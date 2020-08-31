@@ -1,0 +1,5 @@
+<launch>
+    <group ns="jetbot_qr_codes">
+        <node pkg="jetbot_qr_codes" type="aruco.py" name="aruco" />
+    </group>
+</launch>
