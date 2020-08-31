@@ -1,12 +1,17 @@
+# jetbot_qr_code topics
 cmd_raw_topic: cmd_raw
 cmd_str_topic: cmd_str
 cmd_vel_topic: cmd_vel
+markers_topic: markers
 
+# other node topics
 raw_camera_topic: /jetbot_ros/jetbot_camera/raw
 
+# robot params
 wheelbase_meters: 0.10
 wheel_radius_meters: 0.03
 
+# camera params
 camera_matrix:   [[ 788.24693847,    0.        ,  602.05667635],
                   [   0.        ,  782.9304954 ,  400.38415523],
                   [   0.        ,    0.        ,    1.        ]]

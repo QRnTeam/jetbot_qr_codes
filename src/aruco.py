@@ -6,26 +6,40 @@ import numpy as np
 import rospy
 
 from sensor_msgs.msg import Image
+from geometry_msgs.msg import Vector3
+from jetbot_qr_codes.msg import Marker, Markers
 
 from vision.arucoreader import ArucoReader
 
 raw_camera_topic = rospy.get_param('raw_camera_topic')
+markers_topic = rospy.get_param('markers_topic')
 
 class MarkersTopic(object):
     def __init__(self, mtx, dist, aruco_side_length):
         self._reader = ArucoReader(mtx, dist, aruco_side_length)
         self._image_sub = rospy.Subscriber(raw_camera_topic, Image, self.image_callback)
+        self._markers_pub = rospy.Publisher(markers_topic, Markers, queue_size=10)
 
     def image_callback(self, image):
         image = cv_bridge.CvBridge().imgmsg_to_cv2(image)
 
-        rospy.logerr("Shape: {}".format(image.shape))
+        ret, tvecs, ids, new_image = self._reader.detect_markers(image)
 
-        ret, markers, new_image = self._reader.detect_markers(image)
+        if not ret:
+            rospy.loginfo("No markers found")
+            return
 
-        if ret:
-            image = new_image
+        markers = Markers()
+        markers.markers = []
+        for i in range(len(ids)):
+            pos = Vector3(
+                x=tvecs[i][0][0],
+                y=tvecs[i][0][1],
+                z=tvecs[i][0][2],
+            )
+            markers.markers.append(Marker(position=pos, id=ids[i]))
 
+        self._markers_pub.publish(markers)
 
 if __name__ == '__main__':
     rospy.init_node("arucos")

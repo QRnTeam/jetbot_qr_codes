@@ -12,12 +12,12 @@ class ArucoReader(object):
         markers, ids, rejected = cv2.aruco.detectMarkers(image=image, dictionary=self._dict, cameraMatrix=self._mtx, distCoeff=self._dist)
 
         if not np.any(markers):
-            return False, None, None
+            return False, None, None, None
 
         rvecs, tvecs, objPoints = cv2.aruco.estimatePoseSingleMarkers(markers, self._side_length, self._mtx, self._dist)
 
         if not np.any(tvecs):
-            return False, None, None
+            return False, None, None, None
 
         assert (len(markers) == len(ids) == len(tvecs)), "Must have same number of markers, ids and tvecs"
 
@@ -26,7 +26,7 @@ class ArucoReader(object):
         for i in range(len(ids)):
             cv2.aruco.drawAxis(image_copy, self._mtx, self._dist, rvecs[i], tvecs[i], 0.05)
 
-        return True, zip(tvecs, ids), image_copy
+        return True, tvecs, ids, image_copy
 
 if __name__ == '__main__':
     mtx = np.mat([[1.35007461e+03, 0.00000000e+00, 9.64381787e+02],[0.00000000e+00, 1.34859409e+03, 6.10803328e+02],[0.00000000e+00, 0.00000000e+00, 1.00000000e+00]])
@@ -41,9 +41,8 @@ if __name__ == '__main__':
         if not ret:
             continue
 
-        ret, markers, image_with_markers = reader.detect_markers(image)
+        ret, tvecs, ids, image_with_markers = reader.detect_markers(image)
         if ret:
-            print("markers:", markers)
             image = image_with_markers
 
         cv2.imshow("Live", image)
