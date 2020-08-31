@@ -3,6 +3,7 @@ cmd_raw_topic: cmd_raw
 cmd_str_topic: cmd_str
 cmd_vel_topic: cmd_vel
 markers_topic: markers
+processed_image_topic: processed_image
 
 # other node topics
 raw_camera_topic: /jetbot_ros/jetbot_camera/raw
