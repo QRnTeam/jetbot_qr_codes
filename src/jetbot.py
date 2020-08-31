@@ -8,8 +8,8 @@ from jetbot_qr_codes.msg import Markers
 
 LIMITER_SIGNS = {
     #id: [front_limit, back_limit]
-    0: (0.00, 0.00),
-    1: (0.50, 0.50),
+    0: (0.50, 0.50),
+    1: (0.75, 0.75),
     2: (1.00, 1.00),
     # 3, 4 are reserved for special signs
 }
@@ -32,9 +32,10 @@ class Jetbot(object):
         self._wheel_radius_meters = wheel_radius
         self._max_speed = max_speed
 
-        self._rate = rospy.Rate(5)
+        self._rate = rospy.Rate(2)
 
-        self._twist = Twist()
+        self._vel = 0
+        self._turn = 0
         self._vel_sub = rospy.Subscriber(cmd_vel_topic, Twist, self.vel_callback)
 
         self._markers = []
@@ -45,7 +46,8 @@ class Jetbot(object):
 
     def vel_callback(self, twist):
         rospy.loginfo("Received cmd_vel: {}".format(twist))
-        self._twist = twist
+        self._vel = twist.linear.x
+        self._turn = twist.angular.z
 
     def markers_callback(self, markers):
         rospy.loginfo("Received markers: {}".format(markers))
@@ -55,8 +57,7 @@ class Jetbot(object):
 
     def run(self):
         while not rospy.is_shutdown():
-            twist = self._twist
-            vel = twist.linear.x
+            vel = self._vel
 
             rospy.logdebug("Velocity requested: {}".format(vel))
 
@@ -82,7 +83,9 @@ class Jetbot(object):
 
             rospy.logdebug("Velocity final: {}".format(vel))
 
+            twist = Twist()
             twist.linear.x = vel
+            twist.angular.z = self._turn
             self.move(twist)
             self._rate.sleep()
 
@@ -139,7 +142,7 @@ if __name__ == '__main__':
     max_speed = rospy.get_param('max_speed')
 
     rospy.init_node('jetbot')
-    jetbot = Jetbot(wheelbase, wheel_radius)
+    jetbot = Jetbot(wheelbase, wheel_radius, max_speed)
     jetbot.run()
 
     rospy.spin()
