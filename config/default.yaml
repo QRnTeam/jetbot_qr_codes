@@ -2,10 +2,10 @@ cmd_raw_topic: cmd_raw
 cmd_str_topic: cmd_str
 cmd_vel_topic: cmd_vel
 
+raw_camera_topic: /jetbot_ros/jetbot_camera/raw
+
 wheelbase_meters: 0.10
 wheel_radius_meters: 0.03
-
-raw_camera_topic: /jetbot_ros/jetbot_camera/raw
 
 camera_matrix:   [[ 788.24693847,    0.        ,  602.05667635],
                   [   0.        ,  782.9304954 ,  400.38415523],

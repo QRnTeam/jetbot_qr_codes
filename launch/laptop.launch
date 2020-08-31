@@ -1,5 +1,7 @@
 <launch>
     <group ns="jetbot_qr_codes">
+	<rosparam command="load" file="$(find jetbot_qr_codes)/config/default.yaml" /> 
+
         <node pkg="jetbot_qr_codes" type="aruco.py" name="aruco" />
     </group>
 </launch>
