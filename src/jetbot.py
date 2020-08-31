@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import rospy
+import numpy as np
 
+from std_msgs.msg import String
 from geometry_msgs.msg import Twist
 from jetbot_qr_codes.msg import Markers
 
@@ -25,10 +27,10 @@ markers_topic = rospy.get_param('markers_topic')
 cmd_raw_topic = rospy.get_param('cmd_raw_topic')
 
 class Jetbot(object):
-    def __init__(self, wheelbase, wheel_radius):
+    def __init__(self, wheelbase, wheel_radius, max_speed):
         self._wheelbase_meters = wheelbase
         self._wheel_radius_meters = wheel_radius
-        self._max_speed = 0.2
+        self._max_speed = max_speed
 
         self._rate = rospy.Rate(5)
 
@@ -48,7 +50,7 @@ class Jetbot(object):
     def markers_callback(self, markers):
         rospy.loginfo("Received markers: {}".format(markers))
         markers = markers.markers
-        markers.sort(key=lambda x: x.position[2])
+        markers.sort(key=lambda x: x.position.z)
         self._markers = markers
 
     def run(self):
@@ -56,8 +58,12 @@ class Jetbot(object):
             twist = self._twist
             vel = twist.linear.x
 
+            rospy.logdebug("Velocity requested: {}".format(vel))
+
             # clamp to max speed
             vel = abs_clamp(vel, self._max_speed)
+
+            rospy.logdebug("Velocity clamped to max: {}".format(vel))
 
             # find speed limit from closest marker
             if np.any(self._markers):
@@ -66,11 +72,15 @@ class Jetbot(object):
             else:
                 front_limit, back_limit = (0, 0)
 
+            rospy.logdebug("Limits: {}, {}".format(front_limit, back_limit))
+
             # apply speed limit based on max speed
             if vel >= 0:
                 vel = abs_clamp(vel, front_limit*self._max_speed)
             else:
                 vel = abs_clamp(vel, back_limit*self._max_speed)
+
+            rospy.logdebug("Velocity final: {}".format(vel))
 
             twist.linear.x = vel
             self.move(twist)
@@ -124,6 +134,12 @@ class Jetbot(object):
         return v_l, v_r
 
 if __name__ == '__main__':
+    wheelbase = rospy.get_param('wheelbase_meters')
+    wheel_radius = rospy.get_param('wheel_radius_meters')
+    max_speed = rospy.get_param('max_speed')
+
     rospy.init_node('jetbot')
-    Jetbot()
+    jetbot = Jetbot(wheelbase, wheel_radius)
+    jetbot.run()
+
     rospy.spin()

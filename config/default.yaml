@@ -11,6 +11,7 @@ raw_camera_topic: /jetbot_ros/jetbot_camera/raw
 # robot params
 wheelbase_meters: 0.10
 wheel_radius_meters: 0.03
+max_speed: 0.2
 
 # camera params
 camera_matrix:   [[ 788.24693847,    0.        ,  602.05667635],
