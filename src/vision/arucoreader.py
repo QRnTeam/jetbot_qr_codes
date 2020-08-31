@@ -24,7 +24,7 @@ class ArucoReader(object):
         image_copy = np.copy(image)
         cv2.aruco.drawDetectedMarkers(image_copy, markers)
         for i in range(len(ids)):
-            cv2.aruco.drawAxis(image_copy, mtx, dist, rvecs[i], tvecs[i], 0.05)
+            cv2.aruco.drawAxis(image_copy, self._mtx, self._dist, rvecs[i], tvecs[i], 0.05)
 
         return True, zip(tvecs, ids), image_copy
 
