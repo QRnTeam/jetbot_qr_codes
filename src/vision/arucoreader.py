@@ -25,6 +25,9 @@ class ArucoReader(object):
         cv2.aruco.drawDetectedMarkers(image_copy, markers)
         for i in range(len(ids)):
             cv2.aruco.drawAxis(image_copy, self._mtx, self._dist, rvecs[i], tvecs[i], 0.05)
+            marker = markers[i][0]
+            x, y, z = marker[0][0], marker[0][1], tvecs[i][0][2]
+            image_copy=cv2.putText(image_copy, "dist={0:.2f}".format(z), (x, y), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), 2)
 
         return True, tvecs, ids, image_copy
 
