@@ -4,36 +4,43 @@ import rospy
 import cv2
 import numpy as np
 
-def follow(image):
-    # based heavily on code from Robot Ignite Academy
-    #
-    # image should be BGR-encoded for opencv
-    height, width, channels = image.shape
+class LineFollower(object):
+    def __init__(self, lower, upper):
+        # hsv filters should be provided as np.array([h, s, v])
+        #
+        # Args:
+        #   lower: the lower range for hsv filtering
+        #   upper: the upper range for hsv filtering
+        self._lower = lower
+        self._upper = upper
 
-    mid = height / 2
-    image = image[mid:,:]
+    def follow(self, image):
+        # based heavily on code from Robot Ignite Academy
+        #
+        # image should be BGR-encoded for opencv
+        height, width, channels = image.shape
 
-    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV).astype(np.float)
+        mid = height / 2
+        image = image[mid:,:]
 
-    lower_color = np.array([20, 100, 100])
-    upper_color = np.array([50, 255, 255])
-    
-    mask = cv2.inRange(hsv, lower_color, upper_color)
-    m = cv2.moments(mask, False)
-    try:
-        cx, cy = m['m10']/m['m00'], m['m01']/m['m00']
-    except ZeroDivisionError:
-        cx, cy = width/2, height/2
+        hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV).astype(np.float)
 
-    res = cv2.bitwise_and(image, image, mask=mask)
-    cv2.circle(res, (int(cx), int(cy)), 10, (0, 0, 255), -1)
+        lower = self._lower
+        upper = self._upper
+        
+        mask = cv2.inRange(hsv, lower, upper)
+        m = cv2.moments(mask, False)
+        try:
+            cx, cy = m['m10']/m['m00'], m['m01']/m['m00']
+        except ZeroDivisionError:
+            cx, cy = width/2, height/2
 
-    return _heading(cx, width)
+        res = cv2.bitwise_and(image, image, mask=mask)
+        cv2.circle(res, (int(cx), int(cy)), 10, (0, 0, 255), -1)
 
-def _heading(cx, width):
-    error_x = cx - width / 2;
-    angular_z = -error_x / 100;
-    return -error_x / 100;
+        # calculate heading
+        error_x = cx - width / 2;
+        return -error_x / 100;
 
 if __name__ == '__main__':
     import sys
@@ -43,6 +50,11 @@ if __name__ == '__main__':
 
     image = cv2.imread(image_path)
     image = cv2.flip(image, 1)
-    heading = follow(image)
+
+    lower = np.array([20, 100, 100])
+    upper = np.array([50, 255, 255])
+        
+    follower = LineFollower(lower, upper)
+    heading = follower.follow(image)
 
     print("proposed heading from image: {}".format(heading))
