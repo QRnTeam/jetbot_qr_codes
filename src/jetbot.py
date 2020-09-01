@@ -28,10 +28,12 @@ turning_topic = rospy.get_param('turning_topic')
 markers_topic = rospy.get_param('markers_topic')
 
 class Jetbot(object):
-    def __init__(self, wheelbase, wheel_radius, max_speed):
+    def __init__(self, wheelbase, wheel_radius, max_speed, left_adj, right_adj):
         self._wheelbase_meters = wheelbase
         self._wheel_radius_meters = wheel_radius
         self._max_speed = max_speed
+        self._left_adj = left_adj
+        self._right_adj = right_adj
 
         self._rate = rospy.Rate(2)
 
@@ -130,7 +132,11 @@ class Jetbot(object):
             v_l /= speed_r
             v_r /= speed_r
 
+        v_l *= self._left_adj
+        v_r *= self._right_adj
+
         cmd = "{},{}".format(v_l, v_r)
+
         self._raw_pub.publish(cmd)
 
     def unicycle(self, twist):
@@ -163,9 +169,11 @@ if __name__ == '__main__':
     wheelbase = rospy.get_param('wheelbase_meters')
     wheel_radius = rospy.get_param('wheel_radius_meters')
     max_speed = rospy.get_param('max_speed')
+    left_adj = rospy.get_param('left_adj')
+    right_adj = rospy.get_param('right_adj')
 
     rospy.init_node('jetbot')
-    jetbot = Jetbot(wheelbase, wheel_radius, max_speed)
+    jetbot = Jetbot(wheelbase, wheel_radius, max_speed, left_adj, right_adj)
     jetbot.run()
 
     rospy.spin()
