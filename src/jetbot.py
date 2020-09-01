@@ -75,13 +75,26 @@ class Jetbot(object):
             rospy.logdebug("Velocity clamped to max: {}".format(vel))
 
             # find speed limit from closest marker
+            front_limit, back_limit = (0, 0)
             if np.any(self._markers):
                 marker = self._markers[0]
                 front_limit, back_limit = LIMITER_SIGNS.get(marker.id, (0, 0))
-            else:
-                front_limit, back_limit = (0, 0)
 
             rospy.logdebug("Limits: {}, {}".format(front_limit, back_limit))
+
+            # apply stopping from closest marker
+            if np.any(self._markers):
+                marker = self._markers[0]
+                dist = marker.position.z
+
+                stop_close, stop_far = 0.3, 0.6
+                if dist < stop_close
+                    front_limit = 0
+                elif dist < stop_far:
+                    stop_limit = (dist - stop_close) / (stop_far - stop_close)
+                    front_limit = min(stop_limit, front_limit)
+                else:
+                    front_limit = front_limit
 
             # apply speed limit based on max speed
             if vel >= 0:
