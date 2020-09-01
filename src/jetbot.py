@@ -87,7 +87,7 @@ class Jetbot(object):
                 marker = self._markers[0]
                 dist = marker.position.z
 
-                stop_close, stop_far = 0.3, 0.6
+                stop_close, stop_far = 0.7, 1.5
                 if dist < stop_close
                     front_limit = 0
                 elif dist < stop_far:
