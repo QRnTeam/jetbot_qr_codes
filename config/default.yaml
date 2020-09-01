@@ -24,5 +24,6 @@ camera_dist:    [[-0.34775177,  0.1647844 , -0.00131214,  0.00067494, -0.0454743
 aruco_side_length: 0.0935
 
 # hsv filtering limits
-lower_color: [20, 100, 100]
-upper_color: [50, 255, 255]
+# with max values of [359, 100, 100]
+lower_color: [180, 100, 100]
+upper_color: [240, 100, 100]
