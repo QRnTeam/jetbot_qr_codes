@@ -93,7 +93,8 @@ class Jetbot(object):
 
             twist = Twist()
             twist.linear.x = vel
-            twist.angular.z = self._turn
+            # TODO: Fix and re-enable line tracking.
+            # twist.angular.z = self._turn
             self.move(twist)
             self._rate.sleep()
 
