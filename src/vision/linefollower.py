@@ -36,12 +36,13 @@ class LineFollower(object):
         except ZeroDivisionError:
             cx, cy = width/2, height/2
 
-        res = cv2.bitwise_and(image, image, mask=mask)
-        cv2.circle(res, (int(cx), int(cy)), 10, (0, 0, 255), -1)
+        image = cv2.bitwise_and(image, image, mask=mask)
+        cv2.circle(image, (int(cx), int(cy)), 10, (0, 0, 255), -1)
 
         # calculate heading
         error_x = cx - width / 2;
-        return -error_x / 100;
+        heading = -error_x / 100;
+        return heading, image
 
 if __name__ == '__main__':
     import sys
@@ -56,6 +57,6 @@ if __name__ == '__main__':
     upper = np.array([50, 255, 255])
         
     follower = LineFollower(lower, upper)
-    heading = follower.follow(image)
+    heading, image = follower.follow(image)
 
     print("proposed heading from image: {}".format(heading))

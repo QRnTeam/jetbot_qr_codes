@@ -12,7 +12,7 @@ from jetbot_qr_codes.msg import Marker, Markers
 from vision.arucoreader import ArucoReader
 
 raw_camera_topic = rospy.get_param('raw_camera_topic')
-processed_image_topic = rospy.get_param('processed_image_topic')
+markers_image_topic = rospy.get_param('markers_image_topic')
 markers_topic = rospy.get_param('markers_topic')
 
 class MarkersTopic(object):
@@ -23,7 +23,7 @@ class MarkersTopic(object):
         self._image_sub = rospy.Subscriber(raw_camera_topic, Image, self.image_callback)
 
         self._processed_image_pub = rospy.Publisher(
-                processed_image_topic, Image, queue_size=10)
+                markers_image_topic, Image, queue_size=10)
         self._markers_pub = rospy.Publisher(markers_topic, Markers, queue_size=10)
 
     def image_callback(self, image):

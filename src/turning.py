@@ -8,6 +8,7 @@ from sensor_msgs.msg import Image
 
 raw_camera_topic = rospy.get_param('raw_camera_topic')
 turning_topic = rospy.get_param('turning_topic')
+turning_image_topic = rospy.get_param('turning_image_topic')
 
 class TurningTopic(object):
     def __init__(self, lower_color, upper_color)
@@ -15,6 +16,7 @@ class TurningTopic(object):
         self._follower = LineFollower(lower_color, upper_color)
         self._raw_camera_sub = rospy.Subscriber(raw_camera_topic, Image, self.image_callback)
         self._turning_pub = rospy.Publisher(turning_topic, Twist, queue_size=10)
+        self._turning_image_pub = rospy.Publisher(turning_image_topic, Image, queue_size=10)
 
     def image_callback(self, image):
         image = self._cv_bridge.imgmsg_to_cv2(data, desired_encoding="bgr8")
@@ -23,9 +25,12 @@ class TurningTopic(object):
             return
 
         twist = Twist()
-        twist.angular.z = self._follower.follow(image)
+        twist.angular.z, new_image = self._follower.follow(image)
+        new_image = self._cv_bridge.cv2_to_imgmsg(new_image, "bgr8")
+
         rospy.loginfo("Turning topic publishing: {}".format(twist))
-        self._turning_pub(twist)
+        self._turning_pub.publish(twist)
+        self._turning_image_pub.publish(new_image)
 
 if __name__ == '__main__':
     rospy.init_node('turning')

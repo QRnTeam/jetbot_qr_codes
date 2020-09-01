@@ -39,7 +39,7 @@ class Jetbot(object):
         self._vel_sub = rospy.Subscriber(cmd_vel_topic, Twist, self.vel_callback)
 
         self._turn = 0
-        self._turn = rospy.Subscriber(turning_topic, Twist, self.turning_callback)
+        self._turn_sub = rospy.Subscriber(turning_topic, Twist, self.turning_callback)
 
         self._markers = []
         self._markers_sub = rospy.Subscriber(markers_topic, Markers, self.markers_callback)
