@@ -22,9 +22,10 @@ def abs_clamp(val, _max):
 
     return val
 
-cmd_vel_topic = rospy.get_param('cmd_vel_topic')
-markers_topic = rospy.get_param('markers_topic')
 cmd_raw_topic = rospy.get_param('cmd_raw_topic')
+cmd_vel_topic = rospy.get_param('cmd_vel_topic')
+turning_topic = rospy.get_param('turning_topic')
+markers_topic = rospy.get_param('markers_topic')
 
 class Jetbot(object):
     def __init__(self, wheelbase, wheel_radius, max_speed):
@@ -35,18 +36,25 @@ class Jetbot(object):
         self._rate = rospy.Rate(2)
 
         self._vel = 0
-        self._turn = 0
         self._vel_sub = rospy.Subscriber(cmd_vel_topic, Twist, self.vel_callback)
+
+        self._turn = 0
+        self._turn = rospy.Subscriber(turning_topic, Twist, self.turning_callback)
 
         self._markers = []
         self._markers_sub = rospy.Subscriber(markers_topic, Markers, self.markers_callback)
-        
+
         # TODO: Move cmd_raw into this class.
         self._raw_pub = rospy.Publisher(cmd_raw_topic, String, queue_size=10)
 
     def vel_callback(self, twist):
+        # we only use the linear.x, turning is provided by the turning topic
         rospy.loginfo("Received cmd_vel: {}".format(twist))
         self._vel = twist.linear.x
+
+    def turning_callback(self, twist):
+        rospy.loginfo("Received turning: {}".format(twist))
+        # we only use the angular.z, velocity is provided by cmd_vel topic
         self._turn = twist.angular.z
 
     def markers_callback(self, markers):

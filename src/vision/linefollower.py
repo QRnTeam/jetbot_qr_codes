@@ -28,6 +28,7 @@ class LineFollower(object):
         lower = self._lower
         upper = self._upper
         
+        # TODO: Filter to make sure we have found a good portion of line, otherwise just go straight.
         mask = cv2.inRange(hsv, lower, upper)
         m = cv2.moments(mask, False)
         try:
