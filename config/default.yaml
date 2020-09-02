@@ -9,7 +9,7 @@ markers_image_topic: markers_image
 turning_image_topic: turning_image
 
 # other node topics
-raw_camera_topic: /jetbot_ros/jetbot_camera/raw
+raw_camera_topic: /webcam/image_raw
 
 # robot params
 wheelbase_meters: 0.10
