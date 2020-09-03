@@ -9,15 +9,6 @@ from sensor_msgs.msg import Image
 from geometry_msgs.msg import Twist
 from jetbot_qr_codes.msg import Markers
 
-
-LIMITER_SIGNS = {
-    #id: [front_limit, back_limit]
-    0: (0.50, 0.50),
-    1: (0.75, 0.75),
-    2: (1.00, 1.00),
-    # 3, 4 are reserved for special signs
-}
-
 SIGN_NAMES = {
     0: "Speed Limit 50%",
     1: "Speed Limit 75%",
@@ -26,6 +17,17 @@ SIGN_NAMES = {
     4: "Follow",
 }
 
+LIMITER_SIGNS = {
+    #id: [front_limit, back_limit]
+    0: (0.50, 0.50),
+    1: (0.75, 0.75),
+    2: (1.00, 1.00),
+    3: (0.00, 0.00),
+    4: (0.50, 0.50),
+}
+
+STOP_SIGN_ID = 3
+FOLLOW_SIGN_ID = 4
 
 def abs_clamp(val, _max):
     if val >= 0:
@@ -108,20 +110,34 @@ class Jetbot(object):
             # find speed limit from id of closest marker
             front_limit, back_limit = (0, 0)
             closest_sign = "None"
-            if len(self._markers) > 0:
-                marker = self._markers[0]
+            for marker in self._markers:
                 front_limit, back_limit = LIMITER_SIGNS.get(marker.id, (0, 0))
                 closest_sign = SIGN_NAMES.get(marker.id, "Unknown")
+                if front_limit != 0 or back_limit != 0:
+                    break
+
+            # set heading towards closest marker if it is a follow sign
+            heading = 0
+            if np.any(self._markers):
+                marker = self._markers[0]
+
+                if marker.id == FOLLOW_SIGN_ID:
+                    # We find the offset of the marker midpoint from the center line
+                    # of the image and then get the proportion that the midpoint is
+                    # between the left and right side of the image, with fully left
+                    # being -1.0 and fully right being 1.0
+                    image_mid_x = self._markers_image.shape[1] / 2
+                    offset = marker.midpoint.x - image_mid_x
+                    heading = offset / image_mid_x
 
             rospy.logdebug("Limits: {}, {}".format(front_limit, back_limit))
 
-            # find speed limit based on distance from closest marker
             if np.any(self._markers):
                 marker = self._markers[0]
-                dist = marker.position.z
 
-
+                # find speed limit based on distance from closest marker
                 # TODO: Move into config/*.yaml.
+                dist = marker.position.z
                 stop_close, stop_far = 0.7, 1.5
                 if dist < stop_close:
                     front_limit = 0
@@ -144,7 +160,6 @@ class Jetbot(object):
 
             final_vel = vel/self._max_speed*100
 
-            # TODO: Fix and re-enable line tracking.
             # twist.angular.z = self._turn
             self.move(twist)
 
@@ -156,7 +171,8 @@ class Jetbot(object):
                     "Requested Velocity = {0:.1f}%".format(requested_vel),
                     "Closest Sign = {}".format(closest_sign),
                     "Final Velocity = {0:.1f}%".format(final_vel),
-                    ]
+                    "Heading = {0:.2f}".format(heading),
+                ]
 
                 y0, dy = 25, 30
                 for i, line in enumerate(lines):

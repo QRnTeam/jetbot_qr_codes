@@ -6,7 +6,7 @@ import numpy as np
 import rospy
 
 from sensor_msgs.msg import Image
-from geometry_msgs.msg import Vector3
+from geometry_msgs.msg import Vector3, Point
 from jetbot_qr_codes.msg import Marker, Markers
 
 from vision.arucoreader import ArucoReader
@@ -29,7 +29,7 @@ class MarkersTopic(object):
     def image_callback(self, image):
         image = self._cv_bridge.imgmsg_to_cv2(image, "bgr8")
 
-        ret, tvecs, ids, new_image = self._reader.detect_markers(image)
+        ret, tvecs, ids, midpoints, new_image = self._reader.detect_markers(image)
 
         if not np.any(new_image):
             new_image = image
@@ -38,13 +38,22 @@ class MarkersTopic(object):
         markers.markers = []
 
         if len(tvecs) > 0:
-            for i in range(len(ids)):
+            for i in range(len(tvecs)):
                 pos = Vector3(
                     x=tvecs[i][0][0],
                     y=tvecs[i][0][1],
                     z=tvecs[i][0][2],
                 )
-                markers.markers.append(Marker(position=pos, id=ids[i]))
+                midpoint = Point(
+                    x = midpoints[i][0],
+                    y = midpoints[i][1],
+                )
+                marker = Marker(
+                    position=pos,
+                    id=ids[i],
+                    midpoint=midpoint,
+                )
+                markers.markers.append(marker)
 
         # publish image and markers
         new_image = self._cv_bridge.cv2_to_imgmsg(new_image, "bgr8")

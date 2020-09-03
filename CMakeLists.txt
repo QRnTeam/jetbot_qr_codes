@@ -9,10 +9,9 @@ project(jetbot_qr_codes)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   rospy
-  #jetbot_ros
+  geometry_msgs
   sensor_msgs
   std_msgs
-  geometry_msgs
   message_generation
 )
 
