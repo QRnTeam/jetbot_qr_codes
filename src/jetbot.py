@@ -22,6 +22,8 @@ SIGN_NAMES = {
     0: "Speed Limit 50%",
     1: "Speed Limit 75%",
     2: "Speed Limit 100%",
+    3: "Stop",
+    4: "Follow",
 }
 
 
