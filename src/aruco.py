@@ -37,7 +37,7 @@ class MarkersTopic(object):
         markers = Markers()
         markers.markers = []
 
-        if np.any(ids):
+        if len(tvecs) > 0:
             for i in range(len(ids)):
                 pos = Vector3(
                     x=tvecs[i][0][0],

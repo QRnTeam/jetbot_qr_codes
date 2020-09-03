@@ -12,12 +12,12 @@ class ArucoReader(object):
         markers, ids, rejected = cv2.aruco.detectMarkers(image=image, dictionary=self._dict, cameraMatrix=self._mtx, distCoeff=self._dist)
 
         if not np.any(markers):
-            return False, None, None, None
+            return False, [], [], []
 
         rvecs, tvecs, objPoints = cv2.aruco.estimatePoseSingleMarkers(markers, self._side_length, self._mtx, self._dist)
 
         if not np.any(tvecs):
-            return False, None, None, None
+            return False, [], [], []
 
         assert (len(markers) == len(ids) == len(tvecs)), "Must have same number of markers, ids and tvecs"
 

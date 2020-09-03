@@ -1,10 +1,14 @@
 #!/usr/bin/env python
 import rospy
 import numpy as np
+import cv2
+from cv_bridge import CvBridge, CvBridgeError
 
 from std_msgs.msg import String
+from sensor_msgs.msg import Image
 from geometry_msgs.msg import Twist
 from jetbot_qr_codes.msg import Markers
+
 
 LIMITER_SIGNS = {
     #id: [front_limit, back_limit]
@@ -13,6 +17,13 @@ LIMITER_SIGNS = {
     2: (1.00, 1.00),
     # 3, 4 are reserved for special signs
 }
+
+SIGN_NAMES = {
+    0: "Speed Limit 50%",
+    1: "Speed Limit 75%",
+    2: "Speed Limit 100%",
+}
+
 
 def abs_clamp(val, _max):
     if val >= 0:
@@ -26,6 +37,7 @@ cmd_raw_topic = rospy.get_param('cmd_raw_topic')
 cmd_vel_topic = rospy.get_param('cmd_vel_topic')
 turning_topic = rospy.get_param('turning_topic')
 markers_topic = rospy.get_param('markers_topic')
+final_image_topic   = rospy.get_param('final_image_topic')
 
 class Jetbot(object):
     def __init__(self, wheelbase, wheel_radius, max_speed, left_adj, right_adj):
@@ -34,6 +46,9 @@ class Jetbot(object):
         self._max_speed = max_speed
         self._left_adj = left_adj
         self._right_adj = right_adj
+
+        self._cv_bridge = CvBridge()
+        self._markers_image = None
 
         self._rate = rospy.Rate(2)
 
@@ -49,6 +64,8 @@ class Jetbot(object):
         # TODO: Move cmd_raw into this class.
         self._raw_pub = rospy.Publisher(cmd_raw_topic, String, queue_size=10)
 
+        self._final_image_pub = rospy.Publisher(final_image_topic, Image, queue_size=10)
+
     def vel_callback(self, twist):
         # we only use the linear.x, turning is provided by the turning topic
         rospy.loginfo("Received cmd_vel: {}".format(twist))
@@ -60,8 +77,15 @@ class Jetbot(object):
         self._turn = twist.angular.z
 
     def markers_callback(self, markers):
+
         rospy.loginfo("Received markers: {}".format(markers.markers))
-        self._markers_image = markers.image
+
+        try:
+            self._markers_image = self._cv_bridge.imgmsg_to_cv2(markers.image, desired_encoding="bgr8")
+    	except CvBridgeError as e:
+            rospy.logerr("could not decode imgmsg to cv2: {}".format(e))
+            return
+
         markers = markers.markers
         markers.sort(key=lambda x: x.position.z)
         self._markers = markers
@@ -72,6 +96,7 @@ class Jetbot(object):
             vel = self._vel
 
             rospy.logdebug("Velocity requested: {}".format(vel))
+            requested_vel = vel/self._max_speed*100
 
             # clamp to max speed
             vel = abs_clamp(vel, self._max_speed)
@@ -80,9 +105,11 @@ class Jetbot(object):
 
             # find speed limit from id of closest marker
             front_limit, back_limit = (0, 0)
-            if np.any(self._markers):
+            closest_sign = "None"
+            if len(self._markers) > 0:
                 marker = self._markers[0]
                 front_limit, back_limit = LIMITER_SIGNS.get(marker.id, (0, 0))
+                closest_sign = SIGN_NAMES.get(marker.id, "Unknown")
 
             rospy.logdebug("Limits: {}, {}".format(front_limit, back_limit))
 
@@ -90,6 +117,7 @@ class Jetbot(object):
             if np.any(self._markers):
                 marker = self._markers[0]
                 dist = marker.position.z
+
 
                 # TODO: Move into config/*.yaml.
                 stop_close, stop_far = 0.7, 1.5
@@ -111,9 +139,31 @@ class Jetbot(object):
 
             twist = Twist()
             twist.linear.x = vel
+
+            final_vel = vel/self._max_speed*100
+
             # TODO: Fix and re-enable line tracking.
             # twist.angular.z = self._turn
             self.move(twist)
+
+            if np.any(self._markers_image):
+                image = self._markers_image.copy()
+
+                lines = [
+                    "Max Speed = {0:.3f}".format(self._max_speed),
+                    "Requested Velocity = {0:.1f}%".format(requested_vel),
+                    "Closest Sign = {}".format(closest_sign),
+                    "Final Velocity = {0:.1f}%".format(final_vel),
+                    ]
+
+                y0, dy = 25, 30
+                for i, line in enumerate(lines):
+                    y = y0 + i*dy
+                    image = cv2.putText(image, line, (5, y), cv2.FONT_HERSHEY_PLAIN, 1.33, (0, 0, 255), 2)
+
+                image = self._cv_bridge.cv2_to_imgmsg(image, "bgr8")
+                self._final_image_pub.publish(image)
+
             self._rate.sleep()
 
     def move(self, twist):
