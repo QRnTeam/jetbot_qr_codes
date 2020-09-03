@@ -60,10 +60,12 @@ class Jetbot(object):
         self._turn = twist.angular.z
 
     def markers_callback(self, markers):
-        rospy.loginfo("Received markers: {}".format(markers))
+        rospy.loginfo("Received markers: {}".format(markers.markers))
+        self._markers_image = markers.image
         markers = markers.markers
         markers.sort(key=lambda x: x.position.z)
         self._markers = markers
+
 
     def run(self):
         while not rospy.is_shutdown():
@@ -117,7 +119,7 @@ class Jetbot(object):
     def move(self, twist):
         # Apply twist to two-wheeled differential drive robot.
         #
-        # The output will be published to cmd_raw, which accepts the left 
+        # The output will be published to cmd_raw, which accepts the left
         # and right motor power encoded as a comma-separated string.
         #
         # Example: "-1.0,0.5"
@@ -152,7 +154,7 @@ class Jetbot(object):
         #
         # Calculate:
         #   v_r, v_l: velocity for left and right wheel
-        # 
+        #
         # Equations:
         #   v_r = ((2 * v) + (w * L)) / (2 * R)
         #   v_l = ((2 * v) - (w * L)) / (2 * R)

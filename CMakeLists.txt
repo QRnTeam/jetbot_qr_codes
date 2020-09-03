@@ -10,6 +10,7 @@ project(jetbot_qr_codes)
 find_package(catkin REQUIRED COMPONENTS
   rospy
   #jetbot_ros
+  sensor_msgs
   std_msgs
   geometry_msgs
   message_generation
@@ -74,6 +75,7 @@ generate_messages(
   DEPENDENCIES
   std_msgs  # Or other packages containing msgs
   geometry_msgs
+  sensor_msgs
 )
 
 ################################################

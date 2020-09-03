@@ -31,7 +31,7 @@ class MarkersTopic(object):
         image = cv2.flip(image, -1)
 
         ret, tvecs, ids, new_image = self._reader.detect_markers(image)
-        
+
         if not np.any(new_image):
             new_image = image
 
@@ -49,6 +49,7 @@ class MarkersTopic(object):
 
         # publish image and markers
         new_image = self._cv_bridge.cv2_to_imgmsg(new_image, "bgr8")
+        markers.image = new_image
         self._processed_image_pub.publish(new_image)
         self._markers_pub.publish(markers)
 
