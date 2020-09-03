@@ -28,7 +28,6 @@ class MarkersTopic(object):
 
     def image_callback(self, image):
         image = self._cv_bridge.imgmsg_to_cv2(image, "bgr8")
-        image = cv2.flip(image, -1)
 
         ret, tvecs, ids, new_image = self._reader.detect_markers(image)
 
